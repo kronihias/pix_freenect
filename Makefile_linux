@@ -1,0 +1,55 @@
+# change to your local directories!
+
+#PD_DIR = /Applications/Pd.app/Contents/Resources
+#GEM_DIR = /Users/matthias/Gem
+
+PD_DIR = /home/matthias/pd
+GEM_DIR = /home/matthias/Gem
+
+LIBFREENECT_DIR = /home/matthias/Gem
+
+# build flags
+
+INCLUDES =  -I$(PD_DIR)/src -I.  -I$(GEM_DIR)/src -I$(PD_DIR)/src
+CPPFLAGS  = -fPIC -DPD -O2 -funroll-loops -fomit-frame-pointer  -ffast-math \
+    -Wall -W -Wno-unused -Wno-parentheses -Wno-switch \
+     -g
+
+
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Linux)
+ CPPFLAGS += -DLINUX
+ INCLUDES += `pkg-config --cflags libfreenect`
+ LDFLAGS =  -export_dynamic -shared
+ LIBS = `pkg-config --libs libfreenect`
+ EXTENSION = pd_linux
+endif
+ifeq ($(UNAME),Darwin)
+ CPPFLAGS += -DDARWIN
+ INCLUDES += -I/Users/matthias/_projekte/kinect/libfreenect/include
+ LDFLAGS =  -arch i386 -bundle -undefined dynamic_lookup -flat_namespace 
+ LIBS =  -lm -lfreenect
+ EXTENSION = pd_darwin
+endif
+
+.SUFFIXES = $(EXTENSION)
+
+SOURCES = pix_freenect.cc
+
+all: $(SOURCES:.cc=.$(EXTENSION)) $(SOURCES_OPT:.cc=.$(EXTENSION))
+
+%.$(EXTENSION): %.o
+	gcc $(LDFLAGS) -o $*.$(EXTENSION) $*.o $(LIBS)
+
+.cc.o:
+	g++ $(CPPFLAGS) $(INCLUDES) -o $*.o -c $*.cc
+
+.c.o:
+	gcc $(CPPFLAGS) $(INCLUDES) -o $*.o -c $*.c
+
+clean:
+	rm -f pix_freenect*.o
+	rm -f pix_freenect*.$(EXTENSION)
+
+distro: clean all
+	rm *.o

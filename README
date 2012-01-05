@@ -1,0 +1,82 @@
+
+pix_freenect (0.04 still experimental...)
+======================================
+pure data / Gem external to get Kinect camera streams (and audio - testing)
+
+* depends on libfreenect (v0.1 !!)
+
+Output RGB, Depth and Audio Stream (linux only) simultaneously from multiple Kinect sensors
+Tested with 2 Kinects, should work with more (on different usb controllers)
+
+
+(C) 2011/2012 by Matthias Kronlachner
+__________________________________________________________
+
+::INSTALL::
+tested and compiled for Ubuntu 11.10 and MacOS 10.6.8 with Gem 0.93.2
+
+use binaries or build yourself
+
+
+*	get/install pd and Gem (0.93.2) including src (http://puredata.info)
+
+*	get and install latest libfreenect from https://github.com/OpenKinect/libfreenect
+	(compile with Audio support!)
+
+help with compiling:
+	#...> git clone https://github.com/OpenKinect/libfreenect.git
+	#...> cd libfreenect
+	#.../libfreenect> mkdir build
+	#.../libfreenect> cd build
+	#.../libfreenect/build> ccmake ../
+	--> choose BUILD_AUDIO   ON
+	--> choose BUILD_EXAMPLES   OFF     (ON only if you have GLUT)
+	CMAKE_OSX_ARCHITECTURES  i386;x86_64
+	press [c] (configure), [g] generate, [q] exit
+	
+	#.../libfreenect/build> cmake ../
+	#.../libfreenect/build> make
+	#.../libfreenect/build> sudo make install
+	
+*	rename Makefile in pix_freenect folder for your platform to Makefile and edit it for right path to Gem and pd sources
+
+*	#.../pix_freenect> make
+
+
+*	have a look at the pix_freenect-help.pd file!
+
+
+_______________
+:::CHANGELOG:::
+
+0.04	* open specific kinect by serial number -> external lists all available kinect sensors with serial number on startup
+	-> now you can be sure you use the right kinect if two or more plugged to the computer
+	* output registered depth map --> rgb and depth are matching (depthmap gets a little bit smaller)
+	-> includes the output of depthmap in [mm] distance as 16 bit value packed into r and g color channel
+	* option to change resolution of rgb image to 1280x1024 -> slows down transfer!
+	* various improvements to help file
+
+0.03	* output rgb and depth stream simultaneously
+	* output 4 channel audio as list on linux (experimental)
+	* libfreenect v0.1 -> not backward compatible!!
+	* binary for osx -> thanks to hans-christoph steiner for makefiles
+	* accelerator output
+	* different depth output modes (raw for distance measurement)
+		
+	
+0.02	* compatibility to Gem 0.93
+
+ ________________
+:::KNOWN BUGS:::
+
+*		streams do not start automatically, have to be triggered by led change, tilt change or |accel( message
+
+ ________________
+:::THINGS TO DO:::
+
+*		implement audio resampling in helpfile
+
+
+questions: m.kronlachner@gmail.com
+
+
