@@ -13,10 +13,10 @@ Tested with 2 Kinects, should work with more (on different usb controllers)
 __________________________________________________________
 
 ::INSTALL::
-tested and compiled for Ubuntu 11.10 and MacOS 10.6.8 with Gem 0.93.2
+tested and compiled for Ubuntu 11.10 and MacOS 10.6.8 with Gem 0.93.3
 
-use binaries or build yourself
-
+use binaries from build folder or build yourself
+OSX: make sure that libfreenect.0.0.1.dylib and libusb-1.0.0.dylib provided in build folder are in the same folder than pix_freenect.pd_darwin!
 
 *	get/install pd and Gem (0.93.2) including src (http://puredata.info)
 
@@ -75,7 +75,8 @@ _______________
 :::THINGS TO DO:::
 
 *		implement audio resampling in helpfile
-
+*		pack audio into separate external, maybe motor and led control as well
+*		audio external with built in resampling
 
 questions: m.kronlachner@gmail.com
 
