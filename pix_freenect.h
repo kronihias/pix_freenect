@@ -21,10 +21,6 @@ LOG
 #ifndef INCLUDE_pix_freenect_H_
 #define INCLUDE_pix_freenect_H_
 
-	
-#ifndef _EiC
-//#include "cv.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,8 +32,9 @@ LOG
 
 
 #include "libfreenect.h"
-#include "libfreenect-audio.h"
-
+#ifndef __APPLE__
+	#include "libfreenect-audio.h"
+#endif
 
 #include "Base/GemBase.h"
 #include "Gem/Properties.h"

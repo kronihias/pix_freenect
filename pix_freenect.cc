@@ -38,7 +38,6 @@ CPPEXTERN_NEW_WITH_GIMME(pix_freenect);
 //
 /////////////////////////////////////////////////////////
 
-
 freenect_context *f_ctx;
 freenect_device *f_dev;
 
