@@ -1065,6 +1065,39 @@ void pix_freenect :: accelMess ()
   outlet_anything(m_infooutlet, gensym("tilt_angle"), 1, ap2);
 }
 
+void pix_freenect :: infoMess ()
+{
+	post ("\n::freenect status::");
+  freenect_device_attributes * devAttrib;
+	int nr_devices = freenect_list_device_attributes(f_ctx, &devAttrib);
+  post ("Number of devices found: %d", nr_devices);
+	
+	// display serial numbers
+	const char* id;
+	int i = 0;
+	for(i=0; i < nr_devices; i++){
+		id = devAttrib->camera_serial;
+		devAttrib = devAttrib->next;
+		post ("Device %d serial: %s", i, id);
+	}
+	freenect_free_device_attributes(devAttrib);
+	
+	int ret=freenect_supported_subdevices();
+  
+	
+	if (ret & (1 << 0))
+	{
+		post ("libfreenect supports FREENECT_DEVICE_MOTOR (%i)", ret);
+	}
+	if (ret & (1 << 1))
+	{
+		post ("libfreenect supports FREENECT_DEVICE_CAMERA (%i)", ret);
+	}
+	if (ret & (1 << 2))
+	{
+		post ("libfreenect supports FREENECT_DEVICE_AUDIO (%i)", ret);
+	}
+}
 /////////////////////////////////////////////////////////
 // static member function
 //
@@ -1100,6 +1133,8 @@ void pix_freenect :: obj_setupCallback(t_class *classPtr)
   class_addmethod(classPtr, (t_method)(&pix_freenect::renderDepthCallback),
                   gensym("depth_state"), A_GIMME, A_NULL);
  
+	class_addmethod(classPtr, (t_method)(&pix_freenect::infoMessCallback),
+									gensym("info"), A_NULL);
  }
 
 void pix_freenect :: floatResolutionMessCallback(void *data, t_floatarg resolution)
@@ -1178,4 +1213,9 @@ void pix_freenect :: floatDepthOutputMessCallback(void *data, t_floatarg depth_o
 void pix_freenect :: renderDepthCallback(void *data, t_symbol*s, int argc, t_atom*argv)
 {
 	GetMyClass(data)->renderDepth(argc, argv);
+}
+
+void pix_freenect :: infoMessCallback(void *data)
+{
+  GetMyClass(data)->infoMess();
 }

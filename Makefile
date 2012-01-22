@@ -2,7 +2,6 @@
 PD_APP_DIR = /Applications/Pd-extended.app/Contents/Resources
 PD_DIR = /Users/matthias/Pd-0.42.5-extended/pd
 GEM_DIR = /Users/matthias/Gem-0.93.1
-LIBFREENECT_DIR = /Users/matthias/libfreenect-unstable/include
 # build flags
 
 INCLUDES = -I$(PD_DIR)/include
@@ -19,7 +18,7 @@ ifeq ($(UNAME),Linux)
 endif
 ifeq ($(UNAME),Darwin)
  CPPFLAGS += -DDARWIN
- INCLUDES +=  -I/sw/include -I$(GEM_DIR)/src -I$(PD_DIR)/src -I$(PD_DIR) -I$(LIBFREENECT_DIR) -I./
+ INCLUDES +=  -I/sw/include/libfreenect -I$(GEM_DIR)/src -I$(PD_DIR)/src -I$(PD_DIR) -I./
  LDFLAGS = -c -arch i386 
  LIBS =  -lm -lfreenect
  EXTENSION = pd_darwin
@@ -31,18 +30,16 @@ SOURCES = pix_freenect
 
 all:
 	g++ $(LDFLAGS) $(INCLUDES) $(CPPFLAGS) -o $(SOURCES).o -c $(SOURCES).cc
-	g++ -o $(SOURCES).$(EXTENSION) -undefined dynamic_lookup -arch i386 -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup ./*.o -L/sw/lib -lstdc++ -ldl -lz -lm -lpthread -lfreenect -L$(PD_DIR)/bin -L$(PD_DIR)
+	g++ -o $(SOURCES).$(EXTENSION) -undefined dynamic_lookup -arch i386 -dynamiclib -mmacosx-version-min=10.3 -undefined dynamic_lookup -arch i386 ./*.o -L/sw/lib -lpthread -lfreenect -L$(PD_DIR)/bin -L$(PD_DIR)
 	rm -fr ./*.o
 deploy:
-	ifeq ($(UNAME),Darwin)
-	  mkdir build/$(SOURCES)
-	  ./MacOSX_editpath.sh .
-	  mv *.dylib build/$(SOURCES)
-	  mv *.$(EXTENSION) build/$(SOURCES)
-	  cp *.pd build/$(SOURCES)
-	  rm -fr $(PD_APP_DIR)/extra/$(SOURCES)
-	  mv build/$(SOURCES) $(PD_APP_DIR)/extra/
-	endif
+	mkdir build/$(SOURCES)
+	./embed-MacOSX-dependencies.sh .
+	mv *.dylib build/$(SOURCES)
+	mv *.$(EXTENSION) build/$(SOURCES)
+	cp *.pd build/$(SOURCES)
+	rm -fr $(PD_APP_DIR)/extra/$(SOURCES)
+	mv build/$(SOURCES) $(PD_APP_DIR)/extra/
 clean:
 	rm -f $(SOURCES)*.o
 	rm -f $(SOURCES)*.$(EXTENSION)

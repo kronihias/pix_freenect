@@ -110,6 +110,7 @@
 #X text 419 220 <- change between aligned depth output and so on...
 ;
 #X text 628 137 r->3 msbits \, g ->8 lsbits;
+#X msg 40 40;
 #X connect 2 0 0 0;
 #X connect 3 0 4 0;
 #X connect 4 0 2 0;
@@ -195,7 +196,7 @@
 #X text 359 263 7th output: info outlet;
 #X text -51 151 output acceleration;
 #X msg -52 132 accel;
-#X obj -52 84 tgl 15 0 empty empty accel 17 7 0 10 -262144 -1 -1 1
+#X obj -52 84 tgl 15 0 empty empty accel 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj -52 106 metro 500;
 #N canvas 299 280 857 435 distance_measurement 0;
@@ -461,6 +462,7 @@ to get video stream started -> i'll work on this;
 #X obj 171 258 translateXYZ 2.5 2 0;
 #X obj 123 509 translateXYZ -2.5 -2 0;
 #X text -28 19 (C)2011/2012 Matthias Kronlachner;
+#X msg 32 178 info;
 #X connect 0 0 50 0;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
@@ -497,3 +499,4 @@ to get video stream started -> i'll work on this;
 #X connect 55 0 7 0;
 #X connect 56 0 9 0;
 #X connect 57 0 13 0;
+#X connect 59 0 53 0;

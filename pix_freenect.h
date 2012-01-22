@@ -93,6 +93,7 @@ class GEM_EXTERN pix_freenect : public GemBase
     	void	    	floatAngleMess(float angle);
     	void	    	floatLedMess(float led);
     	void	    	bangMess();
+			void	    	infoMess();
     	void	    	accelMess();
 			void				renderDepth(int argc, t_atom*argv);
 			void				audioOutput();
@@ -191,7 +192,8 @@ class GEM_EXTERN pix_freenect : public GemBase
     	static void    	floatLedMessCallback(void *data, float led);
     	static void    	bangMessCallback(void *data);
     	static void    	accelMessCallback(void *data);
-    	
+    	static void    	infoMessCallback(void *data);
+
     	static void    	floatRgbMessCallback(void *data, float rgb);
     	static void    	floatDepthMessCallback(void *data, float depth);
     	static void    	floatAudioMessCallback(void *data, float audio);
