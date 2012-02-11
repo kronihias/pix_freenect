@@ -888,13 +888,13 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 		
 					uint16_t *depth_pixel = (uint16_t*)depth_front;
 					  
-					for(int y = 0; y < 640*480; y++) {
+					for(int y = 0; y < (640*480-index_offset); y++) {
 						//pixels[4*y]=255;
 						//pixels[4*y+1]=255;
 						pixels[4*y+index_offset]=(uint8_t)(depth_pixel[y] >> 8);
 						pixels[4*y+1+index_offset]=(uint8_t)(depth_pixel[y] & 0xff);
 						pixels[4*y+2+index_offset]=0;
-						//pixels[4*y+3+index_offset]=0;
+						pixels[4*y+3+index_offset]=255;
 					}
 				}
 				
