@@ -665,6 +665,10 @@ void pix_freenect :: startRendering(){
   {
 		m_depth.image.setCsizeByFormat(GL_LUMINANCE);
 	}
+	if (req_depth_output == 3)
+  {
+		m_depth.image.setCsizeByFormat(GL_YCBCR_422_GEM);
+	}
 
   m_depth.image.reallocate();
 	
@@ -794,6 +798,10 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 				{
 					m_depth.image.setCsizeByFormat(GL_LUMINANCE);
 				}
+				if (req_depth_output == 3)
+				{
+					m_depth.image.setCsizeByFormat(GL_YCBCR_422_GEM);
+				}
 				m_depth.image.reallocate();
 				depth_output=req_depth_output;
 			}
@@ -808,7 +816,7 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 			
 					pthread_mutex_unlock(gl_backbuf_mutex);
 					
-				if (depth_output == 0)
+				if (depth_output == 0) // RGBA MAPPED
 				{
 		
 					uint8_t *pixels = m_depth.image.data;
@@ -868,7 +876,7 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 					}
 				}
 				
-				if (depth_output == 1)
+				if (depth_output == 1) // GREYSCALE
 				{
 					uint8_t *pixels = m_depth.image.data;
 		
@@ -882,7 +890,7 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 					}
 				}
 
-				if (depth_output == 2)
+				if (depth_output == 2) // RAW RGBA
 				{
 					uint8_t *pixels = m_depth.image.data;
 		
@@ -896,6 +904,11 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 						pixels[4*y+2+index_offset]=0;
 						pixels[4*y+3+index_offset]=255;
 					}
+				}
+
+				if (depth_output == 3) // RAW YUV
+				{
+					m_depth.image.data= (unsigned char*)&depth_front[0];
 				}
 				
 				m_depth.newimage = 1;
@@ -1206,7 +1219,7 @@ void pix_freenect :: floatAudioMessCallback(void *data, t_floatarg audio)
 void pix_freenect :: floatDepthOutputMessCallback(void *data, t_floatarg depth_output)
 {
   pix_freenect *me = (pix_freenect*)GetMyClass(data);
-  if ((depth_output >= 0) && (depth_output) <= 2)
+  if ((depth_output >= 0) && (depth_output) <= 3)
 		me->req_depth_output=(int)depth_output;
 }
 
