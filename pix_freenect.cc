@@ -711,7 +711,8 @@ void pix_freenect :: render(GemState *state)
 	}
 	
   int size = m_image.image.xsize * m_image.image.ysize * m_image.image.csize;
-  
+	int pixnum = m_image.image.xsize * m_image.image.ysize;
+	
 	pthread_mutex_lock(gl_backbuf_mutex);
 	
 	uint8_t *tmp;
@@ -725,6 +726,7 @@ void pix_freenect :: render(GemState *state)
 	pthread_mutex_unlock(gl_backbuf_mutex);
 	
 	uint8_t *rgb_pixel = rgb_front;
+	unsigned char *pixels=m_image.image.data;
 	
   if (rgb_wanted && rgb_started) //RGB OUTPUT -> Im sure there are better ways to convert from RGB to RGBA...
   {
@@ -733,16 +735,21 @@ void pix_freenect :: render(GemState *state)
 		{
 			if (((int)rgb_format==0) || ((int)rgb_format==5))
 			{
-					int i=0;
-					while (i<=size-1-index_offset) {
-						int num=(i%4)+(i/4)*3;
-						if ((i % 4)==3)
-							{
-									m_image.image.data[i+index_offset]=255.0; // set alpha to 1 - NOT WORKIN?!
-							} else {
-								m_image.image.data[i+index_offset]=rgb_pixel[num];
-							}
-						i++;
+					while (pixnum--) {
+						#ifdef __APPLE__	//under osx order is ARGB
+							pixels[0]=255;
+							pixels[1]=rgb_pixel[0];
+							pixels[2]=rgb_pixel[1];
+							pixels[3]=rgb_pixel[2];
+							
+						#else	// RGBA
+							pixels[0]=rgb_pixel[0];
+							pixels[1]=rgb_pixel[1];
+							pixels[2]=rgb_pixel[2];
+							pixels[3]=255;
+						#endif
+						rgb_pixel+=3;
+						pixels+=4;
 					}
 				} else if (((int)rgb_format==1) || ((int)rgb_format==2)) {
 					int i=0;
@@ -834,7 +841,11 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 						}						
 						int lb = pval & 0xff;
 						int form_mult = 4; // Changed for RGBA (4 instead of originally 3)
-						pixels[form_mult*i+3] = 128; // default alpha value
+						#ifdef __APPLE__
+							pixels[form_mult*i] = 255; // default alpha value
+						#else
+							pixels[form_mult*i+3] = 255; // default alpha value
+						#endif
 						if (depth_pixel[i] ==  0) pixels[4*i+3] = 0; // remove anything without depth value
 						switch (pval>>8) {
 						case 0:																					
@@ -886,7 +897,10 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
   
 					for(int y = 0; y < 640*480; y++) {
 
-						pixels[y+index_offset]=(uint8_t)(depth_pixel[y] >> 3); // output just 8 most significant bits
+						//pixels[y+index_offset]=(uint8_t)(depth_pixel[y] >> 3); // output just 8 most significant bits
+						*pixels=(uint8_t)(*depth_pixel >> 3); // output just 8 most significant bits
+						pixels++;
+						depth_pixel++;
 					}
 				}
 
@@ -896,13 +910,20 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 		
 					uint16_t *depth_pixel = (uint16_t*)depth_front;
 					  
-					for(int y = 0; y < (640*480-index_offset); y++) {
-						//pixels[4*y]=255;
-						//pixels[4*y+1]=255;
-						pixels[4*y+index_offset]=(uint8_t)(depth_pixel[y] >> 8);
-						pixels[4*y+1+index_offset]=(uint8_t)(depth_pixel[y] & 0xff);
-						pixels[4*y+2+index_offset]=0;
-						pixels[4*y+3+index_offset]=255;
+					for(int y = 0; y < (640*480); y++) {
+						#ifdef __APPLE__  // apple is ARGB
+							pixels[0]=255;
+							pixels[1]=(uint8_t)(*depth_pixel >> 8);
+							pixels[2]=(uint8_t)(*depth_pixel & 0xff);
+							pixels[3]=0;
+						#else	// RGBA
+							pixels[0]=(uint8_t)(*depth_pixel >> 8);
+							pixels[1]=(uint8_t)(*depth_pixel & 0xff);
+							pixels[2]=0;
+							pixels[0]=255;
+						#endif
+						pixels+=4;
+						depth_pixel++;
 					}
 				}
 
