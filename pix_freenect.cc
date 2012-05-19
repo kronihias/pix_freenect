@@ -911,17 +911,11 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 					uint16_t *depth_pixel = (uint16_t*)depth_front;
 					  
 					for(int y = 0; y < (640*480); y++) {
-						#ifdef __APPLE__  // apple is ARGB
-							pixels[0]=255;
-							pixels[1]=(uint8_t)(*depth_pixel >> 8);
-							pixels[2]=(uint8_t)(*depth_pixel & 0xff);
-							pixels[3]=0;
-						#else	// RGBA
-							pixels[0]=(uint8_t)(*depth_pixel >> 8);
-							pixels[1]=(uint8_t)(*depth_pixel & 0xff);
-							pixels[2]=0;
-							pixels[0]=255;
-						#endif
+							// RGBA
+							pixels[chRed]=(uint8_t)(*depth_pixel >> 8);
+							pixels[chGreen]=(uint8_t)(*depth_pixel & 0xff);
+							pixels[chBlue]=0;
+							pixels[chAlpha]=255;
 						pixels+=4;
 						depth_pixel++;
 					}
