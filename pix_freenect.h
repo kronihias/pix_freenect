@@ -29,12 +29,9 @@ LOG
 #include <iostream>
 #include <cmath>
 #include <vector>
-
+#include <time.h>
 
 #include "libfreenect.h"
-#ifndef __APPLE__
-	#include "libfreenect-audio.h"
-#endif
 
 #include "Base/GemBase.h"
 #include "Gem/Properties.h"
@@ -101,8 +98,6 @@ class GEM_EXTERN pix_freenect : public GemBase
 			bool 				stopRGB();
 			bool 				startDepth();
 			bool 				stopDepth();
-			bool 				startAudio();
-			bool 				stopAudio();	
 			
 			static void* freenect_thread_func(void*);
 			static void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp);
@@ -119,11 +114,9 @@ class GEM_EXTERN pix_freenect : public GemBase
       
       bool rgb_started;
       bool depth_started;
-      bool audio_started;
       
       bool rgb_wanted;
       bool depth_wanted;
-      bool audio_wanted;
       
 			int got_rgb;
 			int got_depth;
@@ -170,16 +163,7 @@ class GEM_EXTERN pix_freenect : public GemBase
     	pixBlock    	m_depth;
     	
     	GemState					*depth_state;
-    	
-    	pthread_mutex_t   *audio_mutex; /* mutex to lock buffers */
-			
-			float*x_buffer1;        /* audio buffers */
-			float*x_buffer2;
-			float*x_buffer3;
-			float*x_buffer4;
-			unsigned int x_bufsize; /* length of the buffer */
-			unsigned int x_freenect_pos; /* buffer pos for callback */
-			unsigned int x_num_samples; /* how many "active" samples in buffer */
+
 			
     private:
     
@@ -196,7 +180,6 @@ class GEM_EXTERN pix_freenect : public GemBase
 
     	static void    	floatRgbMessCallback(void *data, float rgb);
     	static void    	floatDepthMessCallback(void *data, float depth);
-    	static void    	floatAudioMessCallback(void *data, float audio);
     	
     	static void    	floatDepthOutputMessCallback(void *data, float depth_output);
     	
@@ -205,10 +188,6 @@ class GEM_EXTERN pix_freenect : public GemBase
 			pthread_t freenect_thread;
  
 			t_outlet        *m_infooutlet;
-			t_outlet        *m_mic1_outlet;
-			t_outlet        *m_mic2_outlet;
-			t_outlet        *m_mic3_outlet;
-			t_outlet        *m_mic4_outlet;
 			t_outlet        *m_depthoutlet; 
 			t_inlet         *m_depthinlet; 
 };

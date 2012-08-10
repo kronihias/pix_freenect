@@ -1,11 +1,11 @@
 
 pix_freenect (0.04 still experimental...)
 ======================================
-pure data / Gem external to get Kinect camera streams (and audio - testing)
+Pure Data / Gem external to get Kinect camera streams
 
 * depends on libfreenect (v0.1 !!)
 
-Output RGB, Depth and Audio Stream (linux only) simultaneously from multiple Kinect sensors
+Output RGB and Depth stream simultaneously from multiple Kinect sensors
 Tested with 2 Kinects, should work with more (on different usb controllers)
 
 
@@ -13,10 +13,10 @@ Tested with 2 Kinects, should work with more (on different usb controllers)
 __________________________________________________________
 
 ::INSTALL::
-tested and compiled for Ubuntu 11.10 and MacOS 10.6.8 with Gem 0.93.3
+tested and compiled for Ubuntu 11.10, MacOS 10.6.8 and Windows 7 with Gem 0.93.3
 
 use binaries from build folder or build yourself
-OSX: make sure that libfreenect.0.0.1.dylib and libusb-1.0.0.dylib provided in build folder are in the same folder than pix_freenect.pd_darwin!
+OSX: make sure that .dylib's provided in build folder are in the same folder than pix_freenect.pd_darwin!
 
 *	get/install pd and Gem (0.93.2) including src (http://puredata.info)
 
@@ -49,6 +49,10 @@ help with compiling:
 _______________
 :::CHANGELOG:::
 
+0.10	* various bugfixes
+		* no more init trick has to be made. streams should start and restart reliable!
+		* audio support moved to separate external freenect_audio
+
 0.04	* open specific kinect by serial number -> external lists all available kinect sensors with serial number on startup
 	-> now you can be sure you use the right kinect if two or more plugged to the computer
 	* output registered depth map --> rgb and depth are matching (depthmap gets a little bit smaller)
@@ -69,14 +73,10 @@ _______________
  ________________
 :::KNOWN BUGS:::
 
-*		streams do not start automatically, have to be triggered by led change, tilt change or |accel( message
 
  ________________
 :::THINGS TO DO:::
 
-*		implement audio resampling in helpfile
-*		pack audio into separate external, maybe motor and led control as well
-*		audio external with built in resampling
 
 questions: m.kronlachner@gmail.com
 
