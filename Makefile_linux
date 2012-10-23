@@ -20,7 +20,7 @@ UNAME := $(shell uname -s)
 ifeq ($(UNAME),Linux)
  CPPFLAGS += -DLINUX
  INCLUDES += `pkg-config --cflags libfreenect`
- LDFLAGS =  -export_dynamic -shared
+ LDFLAGS =  --export_dynamic -shared
  LIBS = `pkg-config --libs libfreenect`
  EXTENSION = pd_linux
 endif
