@@ -264,12 +264,14 @@ void *pix_freenect::freenect_thread_func(void*target)
 			if (me->req_depth_format != me->depth_format) {
 				if (me->depth_started)
 				{
-					freenect_stop_depth(me->f_dev);
+					me->stopDepth();
+					//freenect_stop_depth(me->f_dev);
 				}
 				freenect_set_depth_mode(me->f_dev, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, me->req_depth_format)); // just medium resolution available
 				if (me->depth_started)
 				{
-					freenect_start_depth(me->f_dev);
+					me->startDepth();
+					//freenect_start_depth(me->f_dev);
 				}
 				me->depth_format = me->req_depth_format;
 			}
@@ -287,6 +289,7 @@ bool pix_freenect::startRGB()
 	{
 		post ("RGB started");
 		rgb_started=true;
+		freenect_update_tilt_state(f_dev); // trick to wake up thread
 		return true;
 		
 	} else {
@@ -315,6 +318,7 @@ bool pix_freenect::startDepth()
 {
 	int res;
 	res = freenect_start_depth(f_dev);
+    sleep(1); // wait 1s for depth stream to start streaming - delays startup but is necessary!!
 	if (res == 0)
 	{
 		post ("Depth started");
@@ -454,6 +458,7 @@ void pix_freenect :: render(GemState *state)
 	if (!m_rendering)
 	{
 		startRendering();
+		freenect_update_tilt_state(f_dev); // trick
 	} else 	{
 
 		if (rgb_reallocate)
@@ -768,14 +773,19 @@ void pix_freenect :: accelMess ()
 	//post("\r mks acceleration: %4f %4f %4f", dx, dy, dz);
 	//post("%d", state->tilt_angle);
 	t_atom ap[4];
+  t_atom ap2[1];
+	
   SETFLOAT(ap+0, dx);
   SETFLOAT(ap+1, dy);
   SETFLOAT(ap+2, dz);
 
-  outlet_anything(m_infooutlet, gensym("accel"), 3, ap);
-  t_atom ap2[1];
+	SETFLOAT(ap2, state->tilt_status);
+  outlet_anything(m_infooutlet, gensym("tilt_status"), 1, ap2);
+
   SETFLOAT(ap2, state->tilt_angle);
   outlet_anything(m_infooutlet, gensym("tilt_angle"), 1, ap2);
+
+  outlet_anything(m_infooutlet, gensym("accel"), 3, ap);
 }
 
 void pix_freenect :: infoMess ()
