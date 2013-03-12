@@ -205,6 +205,8 @@ pix_freenect :: pix_freenect(int argc, t_atom *argv)
   m_rendering = false;
 }
 
+
+
 void *pix_freenect::freenect_thread_func(void*target)
 {
 	pix_freenect *me = (pix_freenect*) target;
@@ -216,12 +218,19 @@ void *pix_freenect::freenect_thread_func(void*target)
 	freenect_set_depth_mode(me->f_dev, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, me->depth_format));
 	freenect_set_video_buffer(me->f_dev, me->rgb_back);
   //freenect_set_depth_buffer(me->f_dev, depth_back);
-		
+  
 	int accelCount = 0;
 	int status = 0;
-	while ((status >= 0) && (!me->destroy_thread)) {
-			status = freenect_process_events(me->f_ctx);
-			
+	
+  // define timeout 2 sec
+  struct timeval timeout;
+  timeout.tv_sec = 2;
+  
+  while ((status >= 0) && (!me->destroy_thread)) {
+
+		//status = freenect_process_events(me->f_ctx);
+    status = freenect_process_events_timeout(me->f_ctx,&timeout);
+    
 		// Start/Stop Streams if user changed request or started Rendering
 		if (me->m_rendering)
 		{
@@ -277,7 +286,7 @@ void *pix_freenect::freenect_thread_func(void*target)
 			}
 		}
 	}
-	//me->post("freenect thread ended");
+  
 	return 0;
 }
 
@@ -285,6 +294,7 @@ bool pix_freenect::startRGB()
 {
 	int res;
 	res = freenect_start_video(f_dev);
+  sleep(1);
 	if (res == 0)
 	{
 		post ("RGB started");
@@ -442,7 +452,6 @@ void pix_freenect :: startRendering(){
 
   m_depth.image.reallocate();
 	
-	freenect_update_tilt_state(f_dev); // trick to wake up thread
   m_rendering=true;
 }
 
@@ -458,7 +467,6 @@ void pix_freenect :: render(GemState *state)
 	if (!m_rendering)
 	{
 		startRendering();
-		freenect_update_tilt_state(f_dev); // trick
 	} else 	{
 
 		if (rgb_reallocate)
@@ -494,28 +502,24 @@ void pix_freenect :: render(GemState *state)
 			rgb_reallocate = false;
 		}
 
-		int size = m_image.image.xsize * m_image.image.ysize * m_image.image.csize;
-		int pixnum = m_image.image.xsize * m_image.image.ysize;
-
-		pthread_mutex_lock(gl_backbuf_mutex);
-
-		uint8_t *tmp;
-
-		if (got_rgb) {
-			tmp = rgb_front;
-			rgb_front = rgb_mid;
-			rgb_mid = tmp;
-		}
-
-		pthread_mutex_unlock(gl_backbuf_mutex);
-
-		uint8_t *rgb_pixel = rgb_front;
-		unsigned char *pixels=m_image.image.data;
-
 		if (rgb_wanted && rgb_started) //RGB OUTPUT
 		{
 			if (got_rgb) // True if new image
 			{
+        int pixnum = m_image.image.xsize * m_image.image.ysize;
+        
+        uint8_t *tmp;
+        
+        // swap buffer
+        pthread_mutex_lock(gl_backbuf_mutex);
+        tmp = rgb_front;
+        rgb_front = rgb_mid;
+        rgb_mid = tmp;
+        pthread_mutex_unlock(gl_backbuf_mutex);
+        
+        uint8_t *rgb_pixel = rgb_front;
+        unsigned char *pixels=m_image.image.data;
+        
 				if ((int)rgb_format==0)
 				{
 					while (pixnum--) {
@@ -551,7 +555,6 @@ void pix_freenect :: renderDepth(int argc, t_atom*argv)
 	if (!m_rendering)
 	{
 		startRendering();
-		freenect_update_tilt_state(f_dev); // trick
 	} else 	{
 
 		if (argc==2 && argv->a_type==A_POINTER && (argv+1)->a_type==A_POINTER) // is it gem_state?
@@ -658,7 +661,7 @@ void pix_freenect :: stopRendering(){
 	if(rgb_started) 
 		stopRGB();
 	if(depth_started)
-		stopRGB();
+		stopDepth();
 
 }
 
