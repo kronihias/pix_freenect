@@ -226,10 +226,10 @@ void *pix_freenect::freenect_thread_func(void*target)
   struct timeval timeout;
   timeout.tv_sec = 2;
   
-  while ((status >= 0) && (!me->destroy_thread)) {
-
+  while (!me->destroy_thread) {
+	//me->post ("thread start");
 		//status = freenect_process_events(me->f_ctx);
-    status = freenect_process_events_timeout(me->f_ctx,&timeout);
+    	status = freenect_process_events_timeout(me->f_ctx,&timeout);
     
 		// Start/Stop Streams if user changed request or started Rendering
 		if (me->m_rendering)
@@ -285,8 +285,9 @@ void *pix_freenect::freenect_thread_func(void*target)
 				me->depth_format = me->req_depth_format;
 			}
 		}
+	//me->post ("thread end");	
 	}
-  
+  me->post ("freenect thread killed");
 	return 0;
 }
 
@@ -332,6 +333,7 @@ bool pix_freenect::startDepth()
 	if (res == 0)
 	{
 		post ("Depth started");
+		freenect_update_tilt_state(f_dev); // trick to wake up thread
 		depth_started=true;
 		return true;
 
@@ -451,7 +453,25 @@ void pix_freenect :: startRendering(){
 	}
 
   m_depth.image.reallocate();
-	
+  
+  if (rgb_wanted && !rgb_started)
+			{
+				startRGB();
+			}
+			if (!rgb_wanted && rgb_started)
+			{
+				stopRGB();
+			}
+			
+			if (depth_wanted && !depth_started)
+			{
+				startDepth();
+			}
+			if (!depth_wanted && depth_started)
+			{
+				stopDepth();
+			}
+
   m_rendering=true;
 }
 

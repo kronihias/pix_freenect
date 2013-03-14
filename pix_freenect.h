@@ -31,6 +31,10 @@ LOG
 #include <vector>
 #include <time.h>
 
+#ifdef __unix__
+#include <unistd.h> // for sleep(1)
+#endif
+
 #include "libfreenect.h"
 
 #include "Base/GemBase.h"
